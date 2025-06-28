@@ -30,6 +30,9 @@ def extract_text(pdf_file):
 
 
 def summarize_with_ollama(text, model="llama3:instruct", system_prompt=None):
+    """
+    Install Ollama locally and thrn run `ollama pull llama3:instruct`
+    """
     url = "http://localhost:11434/api/chat"
     if not system_prompt:
         system_prompt = "You are a helpful assistant. Summarize the following PDF content."

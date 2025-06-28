@@ -3,8 +3,11 @@ import requests
 import streamlit as st
 
 
-# Streamed response emulator
+# Streamed response emulator from local Ollama.
 def response_generator(prompt):
+    """
+    Install Ollama locally and thrn run `ollama pull llama3:instruct`
+    """
     url = "http://localhost:11434/api/chat"
     model = "llama3:instruct"
     payload = {
@@ -24,7 +27,7 @@ def response_generator(prompt):
    
 
 
-st.title("Local Ollama AI Bot")
+st.title("Dhara's Local Bot")
 
 # Custom CSS for chat alignment
 st.markdown("""
@@ -46,7 +49,7 @@ st.markdown("""
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat messages from history on app rerun
+# Display Chats from history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -58,9 +61,9 @@ if prompt := st.chat_input("What is up?"):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    response = f"Echo: {prompt}"
+    response = ""
     # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        response = st.write_stream(response_generator(prompt))
+    with st.chat_message("assistant"), st.spinner("🤔 Thinking..."):
+        response = st.write_stream(stream=response_generator(prompt))
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
