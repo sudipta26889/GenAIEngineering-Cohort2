@@ -60,7 +60,7 @@ class FashionItem(LanceModel):
     """Schema for fashion items in vector database"""
 
     vector: Vector(clip_model.ndims()) = clip_model.VectorField()
-    image_uri: str = clip_model.ImageField()
+    image_uri: str = clip_model.SourceField()
     description: Optional[str] = None
 
 # =============================================================================
