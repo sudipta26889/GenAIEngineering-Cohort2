@@ -84,17 +84,17 @@ def register_embedding_model(model_name: str = "open-clip") -> Any:
         Embedding model instance
     """
     # TODO: Get the registry instance
-    # registry = ?
+    registry = EmbeddingFunctionRegistry.get_instance()
 
     # TODO: Get and create the model
-    # model = ?
+    model = registry.get(model_name).create()
 
     # TODO: Return the model
-    # return ?
+    return model
 
     # DUMMY IMPLEMENTATION - Replace with actual code
-    print(f"⚠️ TODO: Register embedding model {model_name}")
-    return None
+    # print(f"⚠️ TODO: Register embedding model {model_name}")
+    # return None
 
 
 # Global embedding model
@@ -115,16 +115,16 @@ class FashionItem(LanceModel):
     """
 
     # TODO: Add vector field for embeddings
-    # vector = ?
+    vector: Vector(clip_model.ndims()) = clip_model.VectorField()
 
     # TODO: Add image field
-    # image_uri = ?
+    image_uri: str = clip_model.SourceField()
 
     # TODO: Add text description field
-    # description = ?
+    description: Optional[str] = None
 
     # DUMMY IMPLEMENTATION - Replace with actual schema
-    pass
+    # pass
 
 
 # =============================================================================
@@ -151,59 +151,59 @@ def setup_fashion_database(
     """
 
     # TODO: Connect to LanceDB
-    # db = ?
+    db = lancedb.connect(database_path)
 
     # TODO: Check if table already exists
-    # if table_name in db.table_names():
-    #     existing_table = ?            # open table
-    #     print(f"✅ Table '{table_name}' already exists with {len(existing_table)} items")
-    #     return
-    # else:
-    #     print(f"🏗️ Table '{table_name}' does not exist, creating new fashion database...")
+    if table_name in db.table_names():
+        existing_table = db.open_table(table_name)
+        print(f"✅ Table '{table_name}' already exists with {len(existing_table)} items")
+        return
+    else:
+        print(f"🏗️ Table '{table_name}' does not exist, creating new fashion database...")
 
     # TODO: Load dataset from HuggingFace
-    # print("📥 Loading H&M fashion dataset...")
-    # dataset = ?
-    # train_data = dataset["train"]
+    print("📥 Loading H&M fashion dataset...")
+    dataset = load_dataset(dataset_name)
+    train_data = dataset["train"]
 
     # TODO: Sample data to specified size in the sample_size parameter
-    # train_data = ?
-    # print(f"Processing {len(train_data)} fashion items...")
+    train_data = train_data.select(range(sample_size))
+    print(f"Processing {len(train_data)} fashion items...")
 
     # Create images directory
     os.makedirs(images_dir, exist_ok=True)
 
     # Process each item
-    # table_data = []
-    # for i, item in enumerate(train_data):
-    #     # Get image and text
-    #     image = item["image"]
-    #     text = item["text"]
+    table_data = []
+    for i, item in enumerate(train_data):
+        # Get image and text
+        image = item["image"]
+        text = item["text"]
 
-    #     # Save image
-    #     image_path = os.path.join(images_dir, f"fashion_{i:04d}.jpg")
-    #     image.save(image_path)
+        # Save image
+        image_path = os.path.join(images_dir, f"fashion_{i:04d}.jpg")
+        image.save(image_path)
 
-    #     # Create record
-    #     record = {
-    #         "image_uri": image_path,
-    #         "description": text
-    #     }
-    #     table_data.append(record)
+        # Create record
+        record = {
+            "image_uri": image_path,
+            "description": text
+        }
+        table_data.append(record)
 
-    #     if (i + 1) % 100 == 0:
-    #         print(f"   Processed {i + 1}/{len(train_data)} items...")
+        if (i + 1) % 100 == 0:
+            print(f"   Processed {i + 1}/{len(train_data)} items...")
 
     # TODO: Create vector database table
-    # print("🗄️ Creating vector database table...")
-    # table = ?
-    # print(f"✅ Created table '{table_name}' with {len(table_data)} items")
+    print("🗄️ Creating vector database table...")
+    table = db.create_table(table_name, schema=FashionItem, data=table_data, mode="overwrite")
+    print(f"✅ Created table '{table_name}' with {len(table_data)} items")
 
     # DUMMY IMPLEMENTATION
-    print("⚠️ TODO: Implement database setup")
-    print(f"Database path: {database_path}")
-    print(f"Dataset: {dataset_name}")
-    print(f"Sample size: {sample_size}")
+    # print("⚠️ TODO: Implement database setup")
+    # print(f"Database path: {database_path}")
+    # print(f"Dataset: {dataset_name}")
+    # print(f"Sample size: {sample_size}")
 
 
 def search_fashion_items(
@@ -247,43 +247,43 @@ def search_fashion_items(
     # TODO: Determine search type automatically
     # HINT: Use os.path.exists(query) to check if query is a file path
     # HINT: If file exists, it's an image search; otherwise, it's text search
-    # actual_search_type = ?
+    actual_search_type = "image" if os.path.exists(query) else "text"
 
     # TODO: Connect to database
-    # db = ?
+    db = lancedb.connect(database_path)
 
     # TODO: Open the table
-    # table = ?
+    table = db.open_table(table_name)
 
     # TODO: Perform search based on detected type
-    # if actual_search_type == "image":
-    #     # Load image and search
-    #     image = ?
-    #     results = ?
-    # else:
-    #     # Text search
-    #     results = ?
+    if actual_search_type == "image":
+        # Load image and search
+        image = Image.open(query)
+        results = table.search(image).limit(limit).to_list()
+    else:
+        # Text search
+        results = table.search(query).limit(limit).to_list()
 
     # TODO: Print results found
-    # print(f"   Found {len(results)} results using {actual_search_type} search")
+    print(f"   Found {len(results)} results using {actual_search_type} search")
 
     # TODO: Return results and search type
-    # return results, actual_search_type
+    return results, actual_search_type
 
     # DUMMY IMPLEMENTATION
-    print("⚠️ TODO: Implement fashion search")
-    dummy_results = [
-        {
-            "description": "solid black jersey top with narrow shoulder straps",
-            "image_uri": "fashion_images/fashion_0001.jpg",
-        },
-        {
-            "description": "blue denim jacket with button closure",
-            "image_uri": "fashion_images/fashion_0002.jpg",
-        },
-    ]
+    # print("⚠️ TODO: Implement fashion search")
+    # dummy_results = [
+    #     {
+    #         "description": "solid black jersey top with narrow shoulder straps",
+    #         "image_uri": "fashion_images/fashion_0001.jpg",
+    #     },
+    #     {
+    #         "description": "blue denim jacket with button closure",
+    #         "image_uri": "fashion_images/fashion_0002.jpg",
+    #     },
+    # ]
 
-    return dummy_results, "text"
+    # return dummy_results, "text"
 
 
 # =============================================================================
@@ -320,28 +320,31 @@ def create_fashion_prompt(
 
     # TODO: Create system prompt
     # HINT: Define the AI as a fashion assistant with expertise
-    # system_prompt = "You are a ..."
+    system_prompt = """You are a helpful fashion assistant with expertise in styling and fashion recommendations. 
+Based on the provided fashion items, give personalized and practical advice."""
 
     # TODO: Format retrieved items context
-    # context = "Here are some relevant fashion items from our catalog:\n\n"
-    # for i, item in enumerate(retrieved_items, 1):
-    #     context += f"{i}. {item['description']}\n\n"
+    context = "Here are some relevant fashion items from our catalog:\n\n"
+    for i, item in enumerate(retrieved_items, 1):
+        context += f"{i}. {item['description']}\n\n"
 
     # TODO: Create user query section
     # HINT: Handle different search types (image vs text)
-    # if search_type == "image":
-    #     query_section = ?
-    # else:
-    #     query_section = ?
+    if search_type == "image":
+        query_section = f"Based on the uploaded image and these similar items, provide fashion recommendations."
+    else:
+        query_section = f"User query: {query}\n\nBased on this request and the similar items above, provide helpful fashion recommendations."
+    
 
     # TODO: Combine into final prompt
     # HINT: Combine system prompt, context, query section, and response instruction
-    # prompt = f"{system_prompt}\n\n{context}\n{query_section}\n\nResponse:"
-    # return prompt
+    prompt = f"{system_prompt}\n\n{context}\n{query_section}\n\nResponse:"
+
+    return prompt
 
     # DUMMY IMPLEMENTATION
-    print("⚠️ TODO: Create enhanced prompt")
-    return f"Fashion query: {query}\nRetrieved {len(retrieved_items)} items."
+    # print("⚠️ TODO: Create enhanced prompt")
+    # return f"Fashion query: {query}\nRetrieved {len(retrieved_items)} items."
 
 
 # =============================================================================
@@ -371,22 +374,26 @@ def setup_llm_model(model_name: str = "Qwen/Qwen2.5-0.5B-Instruct") -> Tuple[Any
     print(f"🤖 Loading LLM model: {model_name}")
 
     # TODO: Load tokenizer
-    # tokenizer = ?
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # TODO: Load model
-    # model = ?
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+        device_map="auto" if torch.cuda.is_available() else None
+    )
 
     # TODO: Set pad token if not exists
-    # if tokenizer.pad_token is None:
-    #     tokenizer.pad_token = tokenizer.eos_token
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
     # TODO: Print success message and return
-    # print("✅ LLM model loaded successfully")
-    # return tokenizer, model
+    print("✅ LLM model loaded successfully")
+    return tokenizer, model
 
     # DUMMY IMPLEMENTATION
-    print("⚠️ TODO: Load LLM model and tokenizer")
-    return None, None
+    # print("⚠️ TODO: Load LLM model and tokenizer")
+    # return None, None
 
 
 def generate_fashion_response(
@@ -419,28 +426,28 @@ def generate_fashion_response(
 
     # TODO: Encode prompt with attention mask
     # HINT: Use tokenizer() with return_tensors="pt", truncation=True, max_length=1024, padding=True
-    # inputs = ?
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024, padding=True)
 
     # TODO: Generate response
-    # with torch.no_grad():
-    #     outputs = model.generate(
-    #         inputs.input_ids,
-    #         attention_mask=inputs.attention_mask,
-    #         max_new_tokens=max_tokens,
-    #         temperature=0.7,
-    #         do_sample=True,
-    #         pad_token_id=tokenizer.eos_token_id,
-    #         eos_token_id=tokenizer.eos_token_id
-    #     )
+    with torch.no_grad():
+        outputs = model.generate(
+            inputs.input_ids,
+            attention_mask=inputs.attention_mask,
+            max_new_tokens=max_tokens,
+            temperature=0.7,
+            do_sample=True,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id
+        )
 
     # TODO: Decode response and clean it up
-    # full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # response = full_response.replace(prompt, "").strip()
-    # return response
+    full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    response = full_response.replace(prompt, "").strip()
+    return response
 
     # DUMMY IMPLEMENTATION
-    print("⚠️ TODO: Generate LLM response")
-    return "This is a dummy response. Please implement the LLM generation logic."
+    # print("⚠️ TODO: Generate LLM response")
+    # return "This is a dummy response. Please implement the LLM generation logic."
 
 
 # =============================================================================
@@ -520,48 +527,50 @@ def run_fashion_rag_pipeline(
     print("🔍 PHASE 1: RETRIEVAL")
     # TODO: Search for fashion items using the search function
     # HINT: Call search_fashion_items() with the provided parameters
-    # results, actual_search_type = ?
-    # print(f"   Found {len(results)} relevant items")
+    results, actual_search_type = search_fashion_items(
+        database_path, table_name, query, search_type, limit
+    )
+    print(f"   Found {len(results)} relevant items")
 
     # PHASE 2: AUGMENTATION
     print("📝 PHASE 2: AUGMENTATION")
     # TODO: Create enhanced prompt using retrieved items
     # HINT: Call create_fashion_prompt() with parameters
-    # enhanced_prompt = ?
-    # print(f"   Created enhanced prompt ({len(enhanced_prompt)} chars)")
+    enhanced_prompt = create_fashion_prompt(query, results, actual_search_type)
+    print(f"   Created enhanced prompt ({len(enhanced_prompt)} chars)")
 
     # PHASE 3: GENERATION
     print("🤖 PHASE 3: GENERATION")
     # TODO: Set up LLM and generate response
-    # tokenizer, model = ?
-    # response = ?
-    # print(f"   Generated response ({len(response)} chars)")
+    tokenizer, model = setup_llm_model()
+    response = generate_fashion_response(enhanced_prompt, tokenizer, model)
+    print(f"   Generated response ({len(response)} chars)")
 
     # TODO: Prepare final results dictionary
-    # final_results = {
-    #     "query": query,
-    #     "results": results,
-    #     "response": response,
-    #     "search_type": actual_search_type
-    # }
+    final_results = {
+        "query": query,
+        "results": results,
+        "response": response,
+        "search_type": actual_search_type
+    }
 
     # TODO: Save retrieved images if requested
-    # if save_images:
-    #     saved_image_paths = save_retrieved_images(final_results)
-    #     final_results["saved_image_paths"] = saved_image_paths
+    if save_images:
+        saved_image_paths = save_retrieved_images(final_results)
+        final_results["saved_image_paths"] = saved_image_paths
 
     # TODO: Return final results
-    # return final_results
+    return final_results
 
     # DUMMY IMPLEMENTATION
-    print("⚠️ TODO: Implement complete RAG pipeline")
+    # print("⚠️ TODO: Implement complete RAG pipeline")
 
-    return {
-        "query": query,
-        "results": [],
-        "response": "Pipeline not implemented yet",
-        "search_type": "unknown",
-    }
+    # return {
+    #     "query": query,
+    #     "results": [],
+    #     "response": "Pipeline not implemented yet",
+    #     "search_type": "unknown",
+    # }
 
 
 # =============================================================================
@@ -587,25 +596,33 @@ def fashion_search_app(query):
         return "Please enter a search query", []
 
     # TODO: Setup database if needed (will skip if exists)
+    setup_fashion_database()
 
     # TODO: Run the RAG pipeline
-    # result = ?
+    result = run_fashion_rag_pipeline(
+        query=query,
+        database_path="fashion_db",
+        table_name="fashion_items", 
+        search_type="auto",
+        limit=3,
+        save_images=False  # Don't save images for web app
+    )
 
     # TODO: Get LLM response
-    # llm_response = result['response']
+    llm_response = result['response']
 
     # TODO: Get retrieved images for display
-    # retrieved_images = []
-    # for item in result['results']:
-    #     if 'image_uri' in item and os.path.exists(item['image_uri']):
-    #         img = Image.open(item['image_uri'])
-    #         retrieved_images.append(img)
+    retrieved_images = []
+    for item in result['results']:
+        if 'image_uri' in item and os.path.exists(item['image_uri']):
+            img = Image.open(item['image_uri'])
+            retrieved_images.append(img)
 
     # TODO: Return response and images
-    # return llm_response, retrieved_images
+    return llm_response, retrieved_images
 
     # DUMMY IMPLEMENTATION
-    return "⚠️ TODO: Implement web app functionality", []
+    # return "⚠️ TODO: Implement web app functionality", []
 
 
 def launch_gradio_app():
