@@ -9,3 +9,4 @@ uvicorn
 gradio
 pydantic
 requests
+mcp

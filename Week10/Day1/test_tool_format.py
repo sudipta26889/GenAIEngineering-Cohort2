@@ -12,11 +12,11 @@ def test_tool_message_format():
     print("=" * 40)
     
     # Create new conversation
-    thread_id = new_agent_conversation('openrouter/cypher-alpha:free', 0.7)
+    thread_id = new_agent_conversation('openai/gpt-5-nano', 0.7)
     print(f"Created thread: {thread_id}")
     
     # Send a message that will trigger tool calls
-    add_user_message_and_run_agent(thread_id, "List the files in the notes directory", 'openrouter/cypher-alpha:free', 0.7)
+    add_user_message_and_run_agent(thread_id, "List the files in the notes directory", 'openai/gpt-5-nano', 0.7)
     
     # Get all messages
     messages = get_agent_messages(thread_id)

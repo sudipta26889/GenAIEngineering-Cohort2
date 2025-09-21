@@ -12,7 +12,7 @@ def test_real_agent():
     
     try:
         # Create new conversation
-        thread_id = new_agent_conversation('openrouter/cypher-alpha:free', 0.7)
+        thread_id = new_agent_conversation('openai/gpt-5-nano', 0.7)
         print(f"✅ Created agent thread: {thread_id}")
         
         # Test 1: List files
@@ -20,7 +20,7 @@ def test_real_agent():
         iterations = add_user_message_and_run_agent(
             thread_id, 
             "Please list all files in the notes directory", 
-            'openrouter/cypher-alpha:free', 
+            'openai/gpt-5-nano', 
             0.7
         )
         print(f"✅ Agent completed in {iterations} iterations")
@@ -30,7 +30,7 @@ def test_real_agent():
         iterations = add_user_message_and_run_agent(
             thread_id, 
             "Please read the content of test.txt", 
-            'openrouter/cypher-alpha:free', 
+            'openai/gpt-5-nano', 
             0.7
         )
         print(f"✅ Agent completed in {iterations} iterations")
@@ -40,7 +40,7 @@ def test_real_agent():
         iterations = add_user_message_and_run_agent(
             thread_id, 
             "Please create a file called 'agent_test.txt' with the content 'This file was created by the agent successfully!'", 
-            'openrouter/cypher-alpha:free', 
+            'openai/gpt-5-nano', 
             0.7
         )
         print(f"✅ Agent completed in {iterations} iterations")

@@ -16,7 +16,7 @@ def test_agent_chat():
     
     # Test 1: Create a new agent conversation
     print("✅ Test 1: Creating new agent conversation...")
-    thread_id = new_agent_conversation('openrouter/cypher-alpha:free', 0.7)
+    thread_id = new_agent_conversation('openai/gpt-5-nano', 0.7)
     print(f"   Created agent thread ID: {thread_id}")
     
     # Test 2: Tool execution
@@ -37,7 +37,7 @@ def test_agent_chat():
     
     try:
         iterations = add_user_message_and_run_agent(
-            thread_id, test_message, 'openrouter/cypher-alpha:free', 0.7
+            thread_id, test_message, 'openai/gpt-5-nano', 0.7
         )
         print(f"   Agent completed in {iterations} iterations")
         

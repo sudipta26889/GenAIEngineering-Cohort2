@@ -283,14 +283,14 @@ def build_quiz_ui():
                 with gr.Row():
                     model_select = gr.Dropdown(
                         choices=[
-                            "openrouter/cypher-alpha:free",
+                            "openai/gpt-5-nano",
                             "openai/gpt-4.1",
                             "openai/gpt-4.1-mini",
                             "openai/gpt-4.1-nano",
                             "anthropic/claude-sonnet-4",
                             "anthropic/claude-3.5-sonnet"
                         ],
-                        value="openrouter/cypher-alpha:free",
+                        value="openai/gpt-5-nano",
                         label="Model"
                     )
                     temperature_slider = gr.Slider(

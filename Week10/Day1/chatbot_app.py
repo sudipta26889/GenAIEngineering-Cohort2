@@ -189,7 +189,7 @@ def build_ui():
                         model_dropdown = gr.Dropdown(
                             label="Model",
                             choices=[
-                                "openrouter/cypher-alpha:free",
+                                "openai/gpt-5-nano",
                                 "openai/gpt-4o",
                                 "openai/gpt-4.1",
                                 "openai/gpt-4.1-mini",
@@ -197,7 +197,7 @@ def build_ui():
                                 "anthropic/claude-sonnet-4",
                                 "anthropic/claude-3.5-sonnet"
                             ],
-                            value="openrouter/cypher-alpha:free"
+                            value="openai/gpt-5-nano"
                         )
                         temp_slider = gr.Slider(label="Temperature", minimum=0, maximum=2, value=1, step=0.01)
                         max_tokens_box = gr.Number(label="Max Tokens (empty = unlimited)", value=None, precision=0, interactive=True)

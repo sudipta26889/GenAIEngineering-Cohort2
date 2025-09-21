@@ -114,6 +114,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS agent_threads (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
+        agent_type TEXT DEFAULT 'file_ops',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )''')
@@ -151,6 +152,14 @@ def init_db():
         FOREIGN KEY(thread_id) REFERENCES agent_threads(id),
         FOREIGN KEY(message_id) REFERENCES agent_messages(id)
     )''')
+    
+    # Add agent_type column to existing agent_threads table if it doesn't exist
+    try:
+        c.execute("ALTER TABLE agent_threads ADD COLUMN agent_type TEXT DEFAULT 'file_ops'")
+    except sqlite3.OperationalError:
+        # Column already exists, ignore
+        pass
+    
     conn.commit()
     conn.close()
 
@@ -377,10 +386,10 @@ def get_tool_calls_for_message(thread_id, message_id):
     return rows
 
 # Agent-specific database functions
-def insert_agent_thread(title=None):
+def insert_agent_thread(title=None, agent_type='file_ops'):
     conn = get_db()
     c = conn.cursor()
-    c.execute("INSERT INTO agent_threads (title) VALUES (?)", (title,))
+    c.execute("INSERT INTO agent_threads (title, agent_type) VALUES (?, ?)", (title, agent_type))
     thread_id = c.lastrowid
     conn.commit()
     conn.close()
@@ -394,10 +403,13 @@ def get_agent_thread(thread_id):
     conn.close()
     return row
 
-def list_agent_threads():
+def list_agent_threads(agent_type=None):
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT * FROM agent_threads ORDER BY updated_at DESC")
+    if agent_type:
+        c.execute("SELECT * FROM agent_threads WHERE agent_type=? ORDER BY updated_at DESC", (agent_type,))
+    else:
+        c.execute("SELECT * FROM agent_threads ORDER BY updated_at DESC")
     rows = c.fetchall()
     conn.close()
     return rows

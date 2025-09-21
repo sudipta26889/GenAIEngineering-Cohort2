@@ -2,6 +2,7 @@ import gradio as gr
 import os
 import json
 import sqlite3
+import requests
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from chatbot_models import (
@@ -11,119 +12,53 @@ from chatbot_models import (
     get_agent_tool_calls_for_message
 )
 from chatbot_openrouter import chat_openrouter
-from agent_system_prompt import prompt as SYSTEM_PROMPT
+from gradio_mcp_client import mcp_client
+
+# System prompt for Gradio documentation assistance
+GRADIO_DOC_SYSTEM_PROMPT = """You are a helpful Gradio documentation assistant that can access and search through Gradio's official documentation. You are an autonomous agent that uses tools to provide accurate, up-to-date information about Gradio.
+
+Your capabilities:
+- Load the complete Gradio documentation summary
+- Search through Gradio docs, guides, and demos for specific information
+- Provide detailed explanations with code examples
+- Help users understand Gradio concepts, components, and best practices
+
+Always use your tools to get the most current information from the official Gradio documentation before answering questions. Be thorough and provide helpful examples when appropriate."""
 
 # Initialize database
 init_db()
 
-# Tool functions
-def list_files():
-    """List all files in the notes/ directory"""
+# Tool functions for Gradio Docs MCP Server (Proxy functions)
+def load_gradio_docs():
+    """Load the complete Gradio documentation summary - proxy to gradio_docs_mcp_load_gradio_docs"""
     try:
-        # Ensure notes directory exists
-        os.makedirs('notes', exist_ok=True)
-        
-        files = []
-        for item in os.listdir('notes'):
-            file_path = os.path.join('notes', item)
-            if os.path.isfile(file_path):
-                files.append(item)
-        return {
-            "status": "success",
-            "files": files,
-            "message": f"Found {len(files)} files in notes/ directory"
-        }
+        # Call the MCP client (which acts as proxy to the actual MCP server)
+        import asyncio
+        result = asyncio.run(mcp_client.load_gradio_docs())
+        return result
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error listing files: {str(e)}"
+            "message": f"Error loading Gradio docs: {str(e)}"
         }
 
-def read_file(filename: str):
-    """Read content from a file in the notes/ directory"""
+def search_gradio_docs(query: str):
+    """Search through Gradio documentation for specific information - proxy to gradio_docs_mcp_search_gradio_docs"""
     try:
-        # Ensure notes directory exists
-        os.makedirs('notes', exist_ok=True)
-        
-        # Construct full path in notes directory
-        file_path = os.path.join('notes', filename)
-        
-        if not os.path.exists(file_path):
-            return {
-                "status": "error",
-                "message": f"File '{filename}' not found in notes/ directory"
-            }
-        
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        return {
-            "status": "success",
-            "content": content,
-            "message": f"Successfully read {filename} from notes/ directory"
-        }
+        # Call the MCP client (which acts as proxy to the actual MCP server)
+        import asyncio
+        result = asyncio.run(mcp_client.search_gradio_docs(query))
+        return result
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error reading file '{filename}': {str(e)}"
+            "message": f"Error searching Gradio docs: {str(e)}"
         }
 
-def create_file(name: str, content: str):
-    """Create a new file with given content in the notes/ directory"""
-    try:
-        # Ensure notes directory exists
-        os.makedirs('notes', exist_ok=True)
-        
-        # Construct full path in notes directory
-        file_path = os.path.join('notes', name)
-        
-        if os.path.exists(file_path):
-            return {
-                "status": "error",
-                "message": f"File '{name}' already exists in notes/ directory"
-            }
-        
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        
-        return {
-            "status": "success",
-            "message": f"Created successfully {name} in notes/ directory"
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Error creating file '{name}': {str(e)}"
-        }
-
-def update_file(name: str, content: str):
-    """Update an existing file with new content in the notes/ directory"""
-    try:
-        # Ensure notes directory exists
-        os.makedirs('notes', exist_ok=True)
-        
-        # Construct full path in notes directory
-        file_path = os.path.join('notes', name)
-        
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        
-        return {
-            "status": "success",
-            "message": f"Updated successfully {name} in notes/ directory"
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Error updating file '{name}': {str(e)}"
-        }
-
-# Tool registry
+# Tool registry - using the exact same names as the actual MCP server tools
 TOOLS = {
-    "list_files": list_files,
-    "read_file": read_file,
-    "create_file": create_file,
-    "update_file": update_file
+    "gradio_docs_mcp_load_gradio_docs": load_gradio_docs,
+    "gradio_docs_mcp_search_gradio_docs": search_gradio_docs
 }
 
 # Tool definitions for OpenAI API
@@ -131,8 +66,8 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
-            "name": "list_files",
-            "description": "List all files in the notes/ directory",
+            "name": "gradio_docs_mcp_load_gradio_docs",
+            "description": "Load the complete Gradio documentation summary in /llms.txt style format",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -143,59 +78,17 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
-            "name": "read_file",
-            "description": "Read content from a file in the notes/ directory",
+            "name": "gradio_docs_mcp_search_gradio_docs",
+            "description": "Search through Gradio's docs, guides, and demos using embedding search to return the most relevant context",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "filename": {
+                    "query": {
                         "type": "string",
-                        "description": "The name of the file to read"
+                        "description": "The search query to find relevant Gradio documentation"
                     }
                 },
-                "required": ["filename"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_file",
-            "description": "Create a new file with given content in the notes/ directory",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "The name of the file to create"
-                    },
-                    "content": {
-                        "type": "string",
-                        "description": "The content to write to the file"
-                    }
-                },
-                "required": ["name", "content"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "update_file",
-            "description": "Update an existing file with new content in the notes/ directory",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "The name of the file to update"
-                    },
-                    "content": {
-                        "type": "string",
-                        "description": "The new content for the file"
-                    }
-                },
-                "required": ["name", "content"]
+                "required": ["query"]
             }
         }
     }
@@ -294,8 +187,6 @@ def process_tool_calls(thread_id: int, message_id: int, tool_calls: List[dict]) 
             if result.get("status") == "success":
                 if "content" in result:
                     tool_content = result["content"]
-                elif "files" in result:
-                    tool_content = f"Found {len(result['files'])} files: {', '.join(result['files'])}"
                 else:
                     tool_content = result.get("message", "Operation completed successfully")
             else:
@@ -396,8 +287,8 @@ def agent_conversation_loop(thread_id: int, model: str = "openai/gpt-4o", temper
 
 def new_agent_conversation(model: str = "openai/gpt-4o", temperature: float = 1.0) -> int:
     """Start a new agent conversation"""
-    thread_id = insert_agent_thread(agent_type='file_ops')
-    insert_agent_message(thread_id, "system", SYSTEM_PROMPT, model=model, temperature=temperature)
+    thread_id = insert_agent_thread(agent_type='gradio_docs')
+    insert_agent_message(thread_id, "system", GRADIO_DOC_SYSTEM_PROMPT, model=model, temperature=temperature)
     return thread_id
 
 def add_user_message_and_run_agent(thread_id: int, content: str, model: str = "openai/gpt-4o", temperature: float = 1.0):
@@ -410,6 +301,111 @@ def add_user_message_and_run_agent(thread_id: int, content: str, model: str = "o
     
     return iterations
 
+def markdown_to_html(text: str) -> str:
+    """Convert basic markdown to HTML for better display in Gradio"""
+    import re
+    
+    # Convert code blocks with proper formatting
+    text = re.sub(r'```python\n(.*?)\n```', r'<div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 12px; margin: 8px 0; font-family: \'Courier New\', monospace; font-size: 14px; overflow-x: auto;"><code style="color: #d63384;">\1</code></div>', text, flags=re.DOTALL)
+    text = re.sub(r'```\n(.*?)\n```', r'<div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 12px; margin: 8px 0; font-family: \'Courier New\', monospace; font-size: 14px; overflow-x: auto;"><code>\1</code></div>', text, flags=re.DOTALL)
+    
+    # Convert inline code
+    text = re.sub(r'`([^`]+)`', r'<code style="background-color: #f1f3f4; padding: 2px 4px; border-radius: 3px; font-family: \'Courier New\', monospace; font-size: 13px;">\1</code>', text)
+    
+    # Convert bold text
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong style="font-weight: bold;">\1</strong>', text)
+    
+    # Convert headers
+    text = re.sub(r'^### (.*?)$', r'<h3 style="color: #333; margin: 16px 0 8px 0; font-size: 18px;">\1</h3>', text, flags=re.MULTILINE)
+    text = re.sub(r'^## (.*?)$', r'<h2 style="color: #333; margin: 20px 0 10px 0; font-size: 20px;">\1</h2>', text, flags=re.MULTILINE)
+    text = re.sub(r'^# (.*?)$', r'<h1 style="color: #333; margin: 24px 0 12px 0; font-size: 24px;">\1</h1>', text, flags=re.MULTILINE)
+    
+    # Convert bullet points
+    text = re.sub(r'^- (.*?)$', r'<li style="margin: 4px 0;">\1</li>', text, flags=re.MULTILINE)
+    text = re.sub(r'(<li style="margin: 4px 0;">.*</li>)', r'<ul style="margin: 8px 0; padding-left: 20px;">\1</ul>', text, flags=re.DOTALL)
+    
+    # Convert line breaks
+    text = text.replace('\n', '<br>')
+    
+    return text
+
+def format_response_as_markdown(text: str) -> str:
+    """Format plain text response as proper markdown using AI"""
+    if not text or not text.strip():
+        return text
+    
+    try:
+        import requests
+        import os
+        from dotenv import load_dotenv
+        
+        load_dotenv()
+        
+        # Get API key (support both OpenAI and OpenRouter)
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+        api_key = openai_api_key or openrouter_api_key
+        
+        if not api_key:
+            raise ValueError("No API key found. Please set OPENAI_API_KEY or OPENROUTER_API_KEY environment variable.")
+        
+        # Use OpenRouter API
+        api_url = "https://openrouter.ai/api/v1/chat/completions"
+        
+        # System prompt for markdown formatting
+        system_prompt = """Format a given plain text input as proper markdown by identifying and converting elements (such as command, code, header titles, lists, numbered lists, etc.) into their correct markdown syntax. 
+
+Carefully analyze the input, determine which parts should be formatted with relevant markdown styling, and rewrite the text accordingly. 
+Continue reviewing and formatting until all appropriate markdown conventions are applied throughout the input before finalizing your response.
+Use chain-of-thought reasoning internally before producing your answer to ensure every relevant part of the text receives appropriate markdown formatting.
+
+**Detailed Instructions:**
+- Analyze the plain text thoroughly and decide, for each section, the most suitable markdown formatting.
+    - Apply headers (e.g. #, ##, ###) to any titles or headings.
+    - Convert code commands or code snippets into inline code or fenced code blocks, as relevant.
+    - Change bullet point lists or number lists into the equivalent markdown list format using -, *, or numbers.
+    - Apply bold or italics for emphasis where appropriate (e.g. for important words or phrases clearly meant to be emphasized).
+    - Handle sub-lists and nested lists as nested markdown lists.
+    - Identify and convert any links, blockquotes, or other markdown features as needed.
+- Rewrite and output the fully formatted markdown version, replacing the original plain text.
+
+**Output Format:**
+Return a single markdown-formatted version of the entire input text, ready to be rendered directly. Do not include explanations, comments, or code blocks—only the properly formatted markdown output.
+
+**Reminder:**  
+- Your objective is to understand a plain text input and return a markdown-formatted version, converting all applicable elements.
+- Be thorough in applying markdown syntax for every relevant element (headers, lists, code, etc.).
+- Output only the markdown-formatted version, no extra commentary."""
+        
+        # Prepare request
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        
+        payload = {
+            "model": "openai/gpt-5-nano",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": text}
+            ],
+            "temperature": 0.1,
+            "max_tokens": 4000
+        }
+        
+        # Make API call
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        formatted_text = result["choices"][0]["message"]["content"].strip()
+        return formatted_text
+        
+    except Exception as e:
+        print(f"Error formatting markdown: {e}")
+        # Fallback to original text if formatting fails
+        return text
+
 def get_conversation_history(thread_id: int) -> List[dict]:
     """Get conversation history for display with enhanced tool call information"""
     msgs = get_agent_messages(thread_id)
@@ -420,7 +416,7 @@ def get_conversation_history(thread_id: int) -> List[dict]:
         if m["role"] == "system":
             continue
         
-        msg = {"role": m["role"], "content": m["content"]}
+        content = m["content"]
         
         # Enhanced handling for assistant messages
         if m["role"] == "assistant":
@@ -429,34 +425,30 @@ def get_conversation_history(thread_id: int) -> List[dict]:
             
             if tool_calls:
                 # Show "Tool Calls" even if content is empty
-                tool_call_summary = f"🛠️ Tool Calls ({len(tool_calls)}):\n"
+                tool_call_summary = f"📚 **Gradio Docs Tools** ({len(tool_calls)}):\n"
                 for tc in tool_calls:
                     status_emoji = "✅" if tc["status"] == "completed" else "❌" if tc["status"] == "failed" else "⏳"
-                    tool_call_summary += f"- {status_emoji} {tc['tool_name']}\n"
+                    tool_call_summary += f"- {status_emoji} `{tc['tool_name']}`\n"
                 
-                if msg["content"]:
-                    msg["content"] = f"{msg['content']}\n\n{tool_call_summary}"
+                if content:
+                    content = f"{content}\n\n---\n\n{tool_call_summary}"
                 else:
-                    msg["content"] = tool_call_summary
+                    content = tool_call_summary
             
-            # Add metadata
-            meta = {}
-            for k in ["model", "temperature", "extra"]:
-                if m.get(k) is not None:
-                    meta[k] = m[k]
-            if meta:
-                msg["metadata"] = meta
+            # Format the content as proper markdown using AI
+            content = format_response_as_markdown(content)
         
+        msg = {"role": m["role"], "content": content}
         messages.append(msg)
     
     return messages
 
-def build_agent_ui():
-    """Build the Gradio UI for the agent chat"""
+def build_gradio_doc_agent_ui():
+    """Build the Gradio UI for the Gradio Docs agent chat"""
     from chatbot_models import get_default_title
     
     def get_sidebar_conversations(offset=0, max_display=10):
-        threads = list_agent_threads(agent_type='file_ops')
+        threads = list_agent_threads(agent_type='gradio_docs')
         threads = sorted(threads, key=lambda t: t["updated_at"], reverse=True)
         total = len(threads)
         threads = threads[offset:offset+max_display]
@@ -465,7 +457,7 @@ def build_agent_ui():
         thread_ids = []
         for t in threads:
             title = t["title"] or get_default_title(t["created_at"])
-            options.append([f"🤖 {title}"])
+            options.append([f"📚 {title}"])
             thread_ids.append(t["id"])
         
         more = (offset + max_display) < total
@@ -477,7 +469,7 @@ def build_agent_ui():
     
     def on_new_conversation(model, temperature):
         thread_id = new_agent_conversation(model, temperature)
-        return thread_id, [], f"New agent conversation started (ID: {thread_id})"
+        return thread_id, [], f"New Gradio Docs agent conversation started (ID: {thread_id})"
     
     def on_send_message(message, thread_id, model, temperature):
         if not thread_id:
@@ -494,7 +486,7 @@ def build_agent_ui():
         # Get updated history
         history = get_conversation_history(int(thread_id))
         
-        return history, f"Agent completed in {iterations} iterations"
+        return history, f"Gradio Docs agent completed in {iterations} iterations"
     
     def on_select_conversation(evt: gr.SelectData, thread_ids):
         if not thread_ids or evt is None or evt.index is None or evt.index[0] >= len(thread_ids):
@@ -504,22 +496,84 @@ def build_agent_ui():
         thread_id = thread_ids[idx]
         
         history = get_conversation_history(int(thread_id))
-        return history, thread_id, f"Loaded agent conversation {thread_id}"
+        return history, thread_id, f"Loaded Gradio Docs conversation {thread_id}"
     
     def on_load_more(current_offset, current_thread_ids):
         new_offset = current_offset + 10
         options, thread_ids, more, total = get_sidebar_conversations(new_offset)
         return gr.update(value=options), thread_ids, gr.update(visible=more), new_offset
     
-    with gr.Blocks(title="Agent Chat with Tools") as demo:
-        gr.Markdown("# 🤖 Agent Chat with Tool Calling")
-        gr.Markdown("This agent can use tools to list files, read files, create files, and update files in the notes/ folder. Tool calls are tracked and displayed even when message content is empty.")
+    with gr.Blocks(title="Gradio Docs Agent", css="""
+        .gradio-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .chatbot .message {
+            white-space: pre-wrap;
+        }
+        .chatbot .message code {
+            background-color: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .chatbot .message pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .chatbot .message pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+        .chatbot .message strong {
+            font-weight: bold;
+        }
+        .chatbot .message h1, .chatbot .message h2, .chatbot .message h3 {
+            color: #333;
+            margin: 16px 0 8px 0;
+        }
+        .chatbot .message ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        .chatbot .message li {
+            margin: 4px 0;
+        }
+        /* Enhanced styling for better markdown rendering */
+        .chatbot .message {
+            line-height: 1.6;
+        }
+        .chatbot .message p {
+            margin: 8px 0;
+        }
+        .chatbot .message blockquote {
+            border-left: 4px solid #ddd;
+            margin: 8px 0;
+            padding-left: 16px;
+            color: #666;
+        }
+        .chatbot .message hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 16px 0;
+        }
+    """) as demo:
+        gr.Markdown("# 📚 Gradio Documentation Agent")
+        gr.Markdown("This agent can access and search through Gradio's official documentation using the Gradio Docs MCP Server. Ask questions about Gradio components, features, and best practices!")
         
         with gr.Row():
             with gr.Column(scale=1):
-                gr.Markdown("### Agent Conversations")
+                gr.Markdown("### Gradio Docs Conversations")
                 
-                new_conv_btn = gr.Button("🆕 New Agent Conversation", variant="primary")
+                new_conv_btn = gr.Button("🆕 New Gradio Docs Chat", variant="primary")
                 
                 conversation_list = gr.Dataframe(
                     headers=["Conversations"],
@@ -527,14 +581,14 @@ def build_agent_ui():
                     interactive=True,
                     row_count=10,
                     col_count=1,
-                    label="Load Agent Conversation"
+                    label="Load Gradio Docs Conversation"
                 )
                 
                 load_more_btn = gr.Button("Load More", visible=False)
                 refresh_btn = gr.Button("🔄 Refresh")
                 
             with gr.Column(scale=3):
-                gr.Markdown("### Agent Chat")
+                gr.Markdown("### Gradio Documentation Assistant")
                 
                 chatbot = gr.Chatbot(
                     type="messages",
@@ -544,7 +598,7 @@ def build_agent_ui():
                 
                 with gr.Row():
                     msg_input = gr.Textbox(
-                        placeholder="Type your message here...",
+                        placeholder="Ask about Gradio components, features, or best practices...",
                         scale=4,
                         show_label=False
                     )
@@ -638,5 +692,5 @@ def build_agent_ui():
     return demo
 
 if __name__ == "__main__":
-    demo = build_agent_ui()
+    demo = build_gradio_doc_agent_ui()
     demo.launch()

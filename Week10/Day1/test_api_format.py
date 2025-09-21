@@ -12,15 +12,15 @@ def test_api_message_format():
     print("=" * 50)
     
     # Create new conversation
-    thread_id = new_agent_conversation('openrouter/cypher-alpha:free', 0.7)
+    thread_id = new_agent_conversation('openai/gpt-5-nano', 0.7)
     print(f"Created thread: {thread_id}")
     
     # Add user message
-    insert_agent_message(thread_id, "user", "List files in the notes directory", model='openrouter/cypher-alpha:free', temperature=0.7)
+    insert_agent_message(thread_id, "user", "List files in the notes directory", model='openai/gpt-5-nano', temperature=0.7)
     
     try:
         # Run one iteration of the agent loop
-        iterations = agent_conversation_loop(thread_id, 'openrouter/cypher-alpha:free', 0.7, max_iterations=1)
+        iterations = agent_conversation_loop(thread_id, 'openai/gpt-5-nano', 0.7, max_iterations=1)
         print(f"Agent completed {iterations} iterations")
         
         # Get all messages and show how they would be formatted for API

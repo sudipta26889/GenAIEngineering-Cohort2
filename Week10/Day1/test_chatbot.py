@@ -13,7 +13,7 @@ def test_chatbot():
     
     # Test 1: Create a new conversation
     print("✅ Test 1: Creating new conversation...")
-    tid = new_conversation('openrouter/cypher-alpha:free', 0.7)
+    tid = new_conversation('openai/gpt-5-nano', 0.7)
     print(f"   Created thread ID: {tid}")
     
     # Test 2: Send a message and get response
@@ -22,7 +22,7 @@ def test_chatbot():
     
     try:
         response_count = 0
-        for result in gradio_stream(test_message, tid, 'openrouter/cypher-alpha:free', 0.7, None, None):
+        for result in gradio_stream(test_message, tid, 'openai/gpt-5-nano', 0.7, None, None):
             response_count += 1
             if result and len(result) >= 2:
                 user_msg = result[-2]

@@ -11,7 +11,7 @@ class QuizGenerationResponse(BaseModel):
     questions: List[QuizQuestion]
 
 
-def generate_quiz(topic: str, model: str = "openrouter/cypher-alpha:free", temperature: float = 0.7) -> tuple[Optional[Quiz], Optional[str], Optional[str]]:
+def generate_quiz(topic: str, model: str = "openai/gpt-5-nano", temperature: float = 0.7) -> tuple[Optional[Quiz], Optional[str], Optional[str]]:
     """
     Generate a quiz using LLM with structured responses.
     
