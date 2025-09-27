@@ -199,3 +199,8 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+Week11/Day_1/.env
+Week11/Day_1/env
+Week11/Day_1/venv
+Week11/Day_1/.venv
