@@ -1,0 +1,55 @@
+[Podcast Intro Music]
+
+**Jone:** Welcome back, everyone, to another episode of “AI Unplugged”! I’m your host, Jone, and joining me today is the brilliant, the hilarious, the all-knowing Jane!
+
+**Jane:** [laughs] Wow, you’re really buttering me up, Jone! I hope I can live up to that title today!
+
+**Jone:** [chuckles] Oh, you will! Today, we’re diving into the amazing world of AI Large Language Models, or LLMs, and the groundbreaking developments as of September 2025.
+
+**Jane:** Sounds exciting! Let’s start with the big news—OpenAI has released GPT-5! This model can now process text, images, and audio all at once. Talk about multi-tasking!
+
+**Jone:** Right? I wish I could multi-task like that. My cooking skills and laundry always end up in a tangled mess! 
+
+**Jane:** [laughs] Same! But back to GPT-5, it’s been integrated into tools for education and customer service—improving the way we interact with AI. Users are pumping up their satisfaction levels! 
+
+**Jone:** Who wouldn’t want an AI that actually understands you? Speaking of understanding, Google has given us Bard 2.0. This version comes with something called “Contextual Memory.”
+
+**Jane:** Sounds fancy! It actually remembers your previous chats and preferences, right?
+
+**Jone:** Exactly! So it doesn’t just respond— it remembers your likes and dislikes, sort of like that one friend who can’t ever forget when you said you liked pineapple on pizza.
+
+**Jane:** Ugh! [laughs] Let’s not get into pizza debates today! But seriously, this update has reportedly boosted user retention by over 30%. That’s a gold star for Google!
+
+**Jone:** For sure! Now, let’s hop on over to Meta. They’re gearing up to release LLaMA 3, which aims to be energy-efficient—50% less energy consumption! Mother nature is cheering!
+
+**Jane:** [claps] Way to go, Meta! I love that the tech world is finally thinking about sustainability. Remember when we thought being eco-friendly was just for recycling bins?
+
+**Jone:** And it turns out, our tech can be green too! Speaking of green, Microsoft has rolled out its AI Copilot in Microsoft 365. Productivity increases of around 25%—that’s incredible! 
+
+**Jane:** Definitely! AI helping us write faster? My weekend emails just got a whole lot more efficient! [chuckles]
+
+**Jone:** [laughs] I know, right? Let’s not forget about the new ethical benchmarks for LLMs that were established by a consortium of research institutions. They aim at promoting safety and accountability in deploying these models.
+
+**Jane:** Finally! It’s about time we hold AI to the same standards we’re held at. It feels like we’ve been letting them run wild for too long.  
+
+**Jone:** And there’s been some great research on bias mitigation too! Stanford University has put out a study on how to make LLM outputs more equitable. 
+
+**Jane:** [enthusiastically] Bias-free AI is definitely a goal worth reaching for! We’re not ready for Skynet yet, folks!
+
+**Jone:** [laughs] No, thank you! We also have some promising applications of LLMs in therapy—AI-generated responses for mental health support!
+
+**Jane:** It’s a positive step towards making mental health resources more accessible, though it does raise some eyebrows about AI understanding human emotions.
+
+**Jone:** Good point, Jane. Let’s keep caution in the mix. Now, switching gears, researchers at MIT have been using LLMs for scientific research and finding ways to quicken hypothesis generation!  
+
+**Jane:** Talk about collaboration! Who knew LLMs were potential future lab assistants? “Hey, try combining genetics and music! Who knows?” [laughs]
+
+**Jone:** [laughs] That could be a chart-topping scientific paper! Lastly, we’ve seen a trend towards increased diversity in AI development teams, which is super important!
+
+**Jane:** Yes, diverse teams lead to better insights and less bias. Finally, companies are making commitments to triple underrepresented groups in AI by 2027! Let’s keep that momentum going!
+
+**Jone:** [enthusiastically] Absolutely! Alright folks, that wraps up our update on AI LLMs! Remember, technology can be our greatest ally if used responsibly!
+
+**Jane:** Very true! Thanks for tuning in to AI Unplugged.  See you next time!
+
+[Podcast Outro Music]
