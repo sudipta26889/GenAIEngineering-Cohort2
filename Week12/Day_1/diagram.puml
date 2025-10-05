@@ -1,0 +1,29 @@
+@startuml
+
+class PythonAgent {
+    +name: str
+    +model: OpenAIChat
+    +base_dir: Path
+    +files: List[CsvFile]
+    +charting_libraries: List[str]
+    +instructions: List[str]
+    +markdown: bool
+    +pip_install: bool
+    +show_tool_calls: bool
+    +save_and_run: bool
+    +print_response(request: str, stream: bool)
+}
+
+class OpenAIChat {
+    +id: str
+}
+
+class CsvFile {
+    +path: str
+    +description: str
+}
+
+PythonAgent "1" -- "1" OpenAIChat
+PythonAgent "1" -- "*" CsvFile
+
+@enduml
