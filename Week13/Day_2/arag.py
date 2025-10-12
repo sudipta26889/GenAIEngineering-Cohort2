@@ -383,8 +383,11 @@ if openrouter_key and tavily_key:
                     )
                     texts = text_splitter.split_documents(all_docs)
 
-                    # HuggingFace embeddings
-                    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+                    # HuggingFace embeddings (force CPU load to avoid meta tensor issues)
+                    embeddings = HuggingFaceEmbeddings(
+                        model_name=EMBEDDING_MODEL,
+                        model_kwargs={"device": "cpu"},
+                    )
                     db = FAISS.from_documents(texts, embeddings)
                     retriever = db.as_retriever(search_kwargs={"k": 5})
 
@@ -394,7 +397,15 @@ if openrouter_key and tavily_key:
                 shutil.rmtree(temp_dir)
                 
             except Exception as e:
-                st.error(f"Error processing PDFs: {str(e)}")
+                error_message = str(e)
+                if "meta tensor" in error_message:
+                    st.error(
+                        "Error processing PDFs: HuggingFace attempted to load the model "
+                        "on a meta device. Retry after reinstalling `sentence-transformers` "
+                        ">=2.2,<5 or ensure PyTorch is built with the required backend."
+                    )
+                else:
+                    st.error(f"Error processing PDFs: {error_message}")
 
         # ----------------------------
         # Query Input
