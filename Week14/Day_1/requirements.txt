@@ -1,0 +1,11 @@
+# Core dependencies for LangGraph applications
+langgraph
+
+# OpenAI API client (used for OpenRouter API calls)
+openai
+
+# Streamlit for web UI (used in storygen.py)
+streamlit
+
+# HTTP requests library (used in storygen.py)
+requests
