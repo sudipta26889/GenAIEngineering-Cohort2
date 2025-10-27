@@ -1,0 +1,17 @@
+
+
+browser-use
+playwright
+openai
+requests
+langchain-openai
+langchain-google-genai
+python-dotenv
+streamlit
+nest-asyncio
+
+# then run command 
+
+#playwright install chromium
+
+
